@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - {{ college_info.short_name or 'College' }} Information Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <!-- Left Branding Panel -->
+        <div class="auth-brand-panel">
+            <div class="brand-header">
+                <div class="college-logo-circle">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2>{{ college_info.name }}</h2>
+                <span class="brand-affiliation">{{ college_info.affiliation }}</span>
+            </div>
+            
+            <div class="brand-features">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h4>AI-Powered Helpdesk</h4>
+                        <p>Instant answers to 100+ college FAQs on admissions, courses, fees, and exams.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div>
+                        <h4>Saved Chat History</h4>
+                        <p>Resume your conversations anytime with your student account.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <h4>Official & Secure</h4>
+                        <p>Verified information directly aligned with VTU & college regulations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-footer">
+                <p><i class="fa-solid fa-phone"></i> Helpline: {{ college_info.phone }}</p>
+                <p><i class="fa-solid fa-envelope"></i> {{ college_info.admissions_email }}</p>
+            </div>
+        </div>
+
+        <!-- Right Auth Form Card -->
+        <div class="auth-card-panel">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="mobile-logo-circle">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h3>Student Portal Login</h3>
+                    <p>Enter your credentials to access the 24/7 College Assistant</p>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('login_page') }}" class="auth-form" autocomplete="off">
+                    <div class="form-group">
+                        <label for="identifier"><i class="fa-solid fa-user"></i> Username or Email</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="identifier" 
+                                name="identifier" 
+                                class="form-control" 
+                                placeholder="e.g. sneha_cs or sneha@example.com" 
+                                required 
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                        <div class="input-wrapper password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-control" 
+                                placeholder="Enter your password" 
+                                required
+                            >
+                            <button type="button" class="btn-toggle-pw" onclick="togglePasswordVisibility('password', this)" title="Show/Hide Password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Sign In</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="auth-switch">
+                    <p>New student? <a href="{{ url_for('signup_page') }}">Create your account</a></p>
+                </div>
+
+                <div class="auth-disclaimer">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span>Authorized access for students, applicants, and faculty of {{ college_info.short_name }}.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+    </script>
+</body>
+</html>

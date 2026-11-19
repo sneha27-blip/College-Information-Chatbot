@@ -1,0 +1,1146 @@
+import json
+import os
+
+college_info = {
+    "name": "T John Institute of Technology",
+    "short_name": "TJIT",
+    "tagline": "Empowering Minds, Shaping Tomorrow",
+    "location": "Bannerghatta Road, Gottigere, Bengaluru, Karnataka 560083",
+    "affiliation": "Visvesvaraya Technological University (VTU), Belagavi",
+    "approval": "Approved by AICTE, New Delhi",
+    "official_website": "https://www.tjohncollege.com",
+    "contact_email": "info@tjohngroup.com",
+    "admissions_email": "admissions@tjohngroup.com",
+    "phone": "+91 80 4903 0555",
+    "helpline": "+91 80 4903 0500",
+    "office_hours": "Monday to Friday: 9:00 AM – 4:30 PM, Saturday: 9:00 AM – 1:00 PM (Closed on 2nd Saturdays & Sundays)",
+    "principal_office": "Administrative Block, 1st Floor",
+    "anti_ragging_helpline": "1800-180-5522 / +91 80 4903 0555"
+}
+
+faqs = [
+    # 1. General Information
+    {
+        "id": "gen_01",
+        "category": "General Information",
+        "patterns": ["Where is the college located?", "What is the address of the college?", "College location", "How to reach the college?", "What is the campus address?"],
+        "answer": "The college is located at {location}. It is easily accessible via public and private transport along the Bannerghatta main corridor in Bengaluru."
+    },
+    {
+        "id": "gen_02",
+        "category": "General Information",
+        "patterns": ["Which university is the college affiliated with?", "What is the affiliation of the institute?", "Is the college VTU affiliated?", "University affiliation"],
+        "answer": "{name} ({short_name}) is affiliated with {affiliation} and is approved by {approval}."
+    },
+    {
+        "id": "gen_03",
+        "category": "General Information",
+        "patterns": ["What are the college office hours?", "When is the administrative office open?", "Office timings", "Visiting hours for administration"],
+        "answer": "The administrative and admission offices are open {office_hours}."
+    },
+    {
+        "id": "gen_04",
+        "category": "General Information",
+        "patterns": ["What is the official website?", "College website link", "Where can I find the college portal online?"],
+        "answer": "The official website is {official_website}. You can find the latest announcements, circulars, and notifications there."
+    },
+    {
+        "id": "gen_05",
+        "category": "General Information",
+        "patterns": ["How do I contact the college?", "College contact number", "Admission helpline number", "Contact email"],
+        "answer": "You can reach the college by phone at {phone} / {helpline}, or email us at {contact_email} (general queries) or {admissions_email} (admissions)."
+    },
+    {
+        "id": "gen_06",
+        "category": "General Information",
+        "patterns": ["Is the college AICTE approved?", "AICTE accreditation", "Does the college have government approvals?"],
+        "answer": "Yes, {name} is recognized and approved by the All India Council for Technical Education ({approval})."
+    },
+    {
+        "id": "gen_07",
+        "category": "General Information",
+        "patterns": ["What is the vision and mission of the college?", "College motto", "Vision statement"],
+        "answer": "The vision of {name} is to provide quality technical education and foster innovative learning, ethical values, and research to prepare students for global engineering challenges."
+    },
+    {
+        "id": "gen_08",
+        "category": "General Information",
+        "patterns": ["What is the campus size and atmosphere?", "Campus environment", "Tell me about the campus"],
+        "answer": "The campus offers a serene, green, and tech-enabled environment equipped with modern classrooms, high-tech labs, sports grounds, libraries, and student amenities designed for holistic development."
+    },
+    {
+        "id": "gen_09",
+        "category": "General Information",
+        "patterns": ["Where is the Principal's office located?", "How can I meet the Principal?", "Principal office location"],
+        "answer": "The Principal's office is located at {principal_office}. Meetings can be scheduled by booking an appointment through the administrative desk."
+    },
+    {
+        "id": "gen_10",
+        "category": "General Information",
+        "patterns": ["Are visitors allowed on campus?", "Visitor entry rules", "Can parents visit the campus?"],
+        "answer": "Yes, visitors and parents are welcome during working hours ({office_hours}). Please report to the security reception at the main gate to collect a visitor pass."
+    },
+
+    # 2. Admissions & Eligibility
+    {
+        "id": "adm_01",
+        "category": "Admissions",
+        "patterns": ["How can I apply for admission?", "What is the admission procedure?", "How to get admission in B.Tech?", "Admission process for engineering"],
+        "answer": "Admissions are processed through state entrance exams (KCET/COMEDK) as well as the Management Quota. You can apply online through the portal or visit the Admissions Office directly with required academic documents."
+    },
+    {
+        "id": "adm_02",
+        "category": "Admissions",
+        "patterns": ["What is the eligibility criteria for B.E. / B.Tech?", "Eligibility for engineering admission", "Marks required for 12th B.Tech"],
+        "answer": "Candidates must have passed 10+2 / PUC or equivalent examination with a minimum of 45% aggregate marks in Physics and Mathematics along with Chemistry / Biotechnology / Computer Science / Biology (40% for reserved categories from Karnataka)."
+    },
+    {
+        "id": "adm_03",
+        "category": "Admissions",
+        "patterns": ["Is KCET score accepted for admission?", "KCET quota details", "Can I join through KCET?"],
+        "answer": "Yes, Karnataka Common Entrance Test (KCET) counselling ranks are accepted for Government Quota seats allocated as per KEA guidelines."
+    },
+    {
+        "id": "adm_04",
+        "category": "Admissions",
+        "patterns": ["Is COMEDK accepted for admission?", "Can outside Karnataka students join through COMEDK?", "COMEDK quota"],
+        "answer": "Yes, COMEDK scores are accepted for B.E. admissions. Both Karnataka and non-Karnataka students can participate in COMEDK counselling."
+    },
+    {
+        "id": "adm_05",
+        "category": "Admissions",
+        "patterns": ["Is there management quota admission?", "Direct admission process", "Can I get direct admission in B.Tech?"],
+        "answer": "Yes, management quota seats are available for eligible candidates based on 10+2 academic merit and entrance examination score. Please contact {admissions_email} or call {phone} for seat availability."
+    },
+    {
+        "id": "adm_06",
+        "category": "Admissions",
+        "patterns": ["What is the eligibility for Lateral Entry admission?", "Can diploma holders join engineering second year?", "Lateral entry B.Tech"],
+        "answer": "Diploma holders in appropriate engineering branches with a minimum of 45% marks (40% for reserved category) are eligible for direct admission into the 3rd semester (2nd year) via the DCET counselling or institutional quota."
+    },
+    {
+        "id": "adm_07",
+        "category": "Admissions",
+        "patterns": ["What documents are required during admission?", "List of documents for admission", "Which certificates should I bring?"],
+        "answer": "Required documents include: 10th and 12th/PUC Mark sheets, Transfer Certificate (TC), Migration Certificate (for non-Karnataka/CBSE/ICSE), Study/Conduct Certificate, Entrance Exam Rank Card (KCET/COMEDK), Caste/Income certificate (if applicable), Aadhaar Card copy, and 6 passport-size photographs."
+    },
+    {
+        "id": "adm_08",
+        "category": "Admissions",
+        "patterns": ["Can international or NRI students apply?", "NRI quota admission", "Foreign students admission"],
+        "answer": "Yes, NRI and international students can apply under the International/NRI quota provided they possess AIU equivalence for their qualifying examinations and a valid student visa."
+    },
+    {
+        "id": "adm_09",
+        "category": "Admissions",
+        "patterns": ["What is the application form fee?", "How much is the admission form?", "Cost of admission application"],
+        "answer": "The application processing fee is generally between INR 500 to INR 1,000 depending on the course and quota. Please check the admissions counter or official website for current details."
+    },
+    {
+        "id": "adm_10",
+        "category": "Admissions",
+        "patterns": ["When do admissions start for the new academic year?", "Admission last date", "Deadline to apply for B.Tech"],
+        "answer": "Admissions usually commence in May/June each year and run through August/September in line with VTU and KEA schedules. Early applications are advised due to seat limits in popular branches."
+    },
+    {
+        "id": "adm_11",
+        "category": "Admissions",
+        "patterns": ["Is there an entrance test conducted by the college?", "Does the college have its own entrance exam?", "Institutional entrance test"],
+        "answer": "The college primarily admits students via national and state tests (KCET, COMEDK, JEE Main, PGCET, GATE, KMAT). In certain cases, an aptitude/merit screening is conducted for direct seats."
+    },
+    {
+        "id": "adm_12",
+        "category": "Admissions",
+        "patterns": ["How can I schedule a campus visit for admission counselling?", "Admission counselling visit", "Campus tour for prospective students"],
+        "answer": "You can visit the Admission Cell on any working day ({office_hours}). For a guided campus tour and personalized counselling, you may pre-register on our website or email {admissions_email}."
+    },
+
+    # 3. Courses & Academic Programs
+    {
+        "id": "crs_01",
+        "category": "Courses & Academics",
+        "patterns": ["What undergraduate courses are offered?", "List of B.E. programs", "B.Tech branches available", "Engineering streams"],
+        "answer": "Undergraduate (B.E.) branches typically offered include: Computer Science & Engineering (CSE), Information Science & Engineering (ISE), Electronics & Communication Engineering (ECE), Artificial Intelligence & Machine Learning (AI & ML), Data Science, and Civil Engineering."
+    },
+    {
+        "id": "crs_02",
+        "category": "Courses & Academics",
+        "patterns": ["Does the college offer Computer Science and Engineering (CSE)?", "Tell me about CSE branch", "CSE course details"],
+        "answer": "Yes, Computer Science & Engineering is one of the premier branches, featuring modern computing labs, curricula covering Cloud Computing, AI, Full Stack Development, Cyber Security, and strong placement tie-ups."
+    },
+    {
+        "id": "crs_03",
+        "category": "Courses & Academics",
+        "patterns": ["Is Artificial Intelligence and Machine Learning (AI & ML) offered?", "AI ML branch details", "Do you have AI courses?"],
+        "answer": "Yes, B.E. in Artificial Intelligence & Machine Learning (AI & ML) is offered, focusing on Deep Learning, Natural Language Processing, Neural Networks, Robotics, and Computer Vision."
+    },
+    {
+        "id": "crs_04",
+        "category": "Courses & Academics",
+        "patterns": ["What postgraduate courses are offered?", "List of PG programs", "M.Tech / MBA / MCA availability"],
+        "answer": "Postgraduate offerings include M.Tech specializations, Master of Business Administration (MBA), and Master of Computer Applications (MCA), subject to VTU and AICTE approvals."
+    },
+    {
+        "id": "crs_05",
+        "category": "Courses & Academics",
+        "patterns": ["What is the duration of the B.Tech program?", "How many years is the engineering course?", "B.E. program duration"],
+        "answer": "The B.E. / B.Tech program is a 4-year full-time degree divided into 8 semesters. For lateral entry students, it is 3 years (6 semesters)."
+    },
+    {
+        "id": "crs_06",
+        "category": "Courses & Academics",
+        "patterns": ["What is the duration of MBA and MCA programs?", "How many years is MBA?", "MCA course duration"],
+        "answer": "Both MBA and MCA programs are 2-year full-time postgraduate degree programs structured across 4 semesters."
+    },
+    {
+        "id": "crs_07",
+        "category": "Courses & Academics",
+        "patterns": ["Where can I download the course syllabus?", "VTU syllabus for engineering", "Where to get B.Tech syllabus?"],
+        "answer": "The syllabus follows the prescribed VTU curriculum and can be downloaded from the official VTU website (vtu.ac.in) or obtained from the respective department notice board."
+    },
+    {
+        "id": "crs_08",
+        "category": "Courses & Academics",
+        "patterns": ["Are add-on certification courses provided?", "Value-added courses", "Skill development programs"],
+        "answer": "Yes, departments organize value-added certification courses in emerging technologies such as Python, AWS Cloud, DevOps, IoT, Ethical Hacking, and Data Analytics alongside regular academic subjects."
+    },
+    {
+        "id": "crs_09",
+        "category": "Courses & Academics",
+        "patterns": ["Can students change their engineering branch after the first year?", "Branch change rules", "Change of branch in second year"],
+        "answer": "Branch change is permissible at the beginning of the 3rd semester as per VTU guidelines, subject to seat vacancies in the desired branch and high CGPA in the first year."
+    },
+    {
+        "id": "crs_10",
+        "category": "Courses & Academics",
+        "patterns": ["Are doctoral / Ph.D. programs offered?", "Ph.D. research centers", "Can I do a doctorate here?"],
+        "answer": "Selected departments are recognized as VTU Research Centers where eligible candidates can pursue Ph.D. and M.Sc. (Engg.) by research under qualified faculty guides."
+    },
+
+    # 4. Fee Structure & Payments
+    {
+        "id": "fee_01",
+        "category": "Fees & Payments",
+        "patterns": ["What is the annual tuition fee for B.Tech?", "Engineering fee structure", "How much are the college fees?", "Annual fee details"],
+        "answer": "Fees vary according to the quota (KCET, COMEDK, or Management) and chosen specialization. Government quota fees adhere to state fee regulatory committee norms. Contact {admissions_email} for current year fee sheets."
+    },
+    {
+        "id": "fee_02",
+        "category": "Fees & Payments",
+        "patterns": ["Can college fees be paid in installments?", "Fee installment facility", "Can I pay fees quarterly or semi-annually?"],
+        "answer": "Tuition fees are usually payable annually at the beginning of each academic year. In cases of genuine financial difficulty, students may submit a formal request to the accounts section for split installment payments."
+    },
+    {
+        "id": "fee_03",
+        "category": "Fees & Payments",
+        "patterns": ["What payment modes are accepted?", "How to pay college fees online?", "Payment options for tuition fees", "Bank transfer details"],
+        "answer": "Fees can be paid via Net Banking (NEFT/RTGS), Demand Draft (DD) in favor of the college, UPI, or through the online student payment portal on the college website."
+    },
+    {
+        "id": "fee_04",
+        "category": "Fees & Payments",
+        "patterns": ["Where do I get my fee receipt?", "Fee payment confirmation", "How to get fee challan receipt?"],
+        "answer": "After payment, digital fee receipts can be downloaded from the student portal, or an official stamped receipt can be collected from the Accounts Section, Ground Floor."
+    },
+    {
+        "id": "fee_05",
+        "category": "Fees & Payments",
+        "patterns": ["What is the college fee refund policy?", "Can I get a refund if I cancel my seat?", "Cancellation of admission refund"],
+        "answer": "Admission cancellations and refunds are processed strictly in accordance with AICTE and UGC refund guidelines. Deductions apply depending on the date of withdrawal relative to the last admission date."
+    },
+    {
+        "id": "fee_06",
+        "category": "Fees & Payments",
+        "patterns": ["Is there a fine for late fee payment?", "Late payment charges", "Penalty for delayed fees"],
+        "answer": "Yes, payments made past the specified deadline without prior written permission may attract a nominal late fee. Notices regarding deadlines are posted prior to semester start."
+    },
+    {
+        "id": "fee_07",
+        "category": "Fees & Payments",
+        "patterns": ["Are examination fees included in the tuition fee?", "VTU exam fee payment", "Does tuition cover exam fees?"],
+        "answer": "No, University examination fees are levied separately per semester according to VTU notifications and must be remitted before exam form submission."
+    },
+    {
+        "id": "fee_08",
+        "category": "Fees & Payments",
+        "patterns": ["Does the college provide education loan assistance?", "Bank loan letter from college", "Loan bonafide certificate"],
+        "answer": "Yes, the college provides estimate letters and bonafide documentation required by banks to sanction education loans for tuition and hostel expenses."
+    },
+
+    # 5. Scholarships & Financial Support
+    {
+        "id": "sch_01",
+        "category": "Scholarships",
+        "patterns": ["Are scholarships available for students?", "Can I get a scholarship?", "College scholarship details"],
+        "answer": "Yes, merit-based scholarships, government welfare scholarships (SSP/NSP), and institutional concession schemes are available for qualifying students."
+    },
+    {
+        "id": "sch_02",
+        "category": "Scholarships",
+        "patterns": ["How do I apply for Karnataka State Scholarship (SSP)?", "State scholarship portal SSP", "SSP application process"],
+        "answer": "Eligible Karnataka students should apply through the State Scholarship Portal (SSP - ssp.postmatric.karnataka.gov.in). The college scholarship coordinator assists in verifying documents."
+    },
+    {
+        "id": "sch_03",
+        "category": "Scholarships",
+        "patterns": ["Is there a scholarship for SC / ST / OBC students?", "Fee concession for reserved categories", "SC ST scholarship"],
+        "answer": "Yes, government post-matric scholarships and fee reimbursements are provided to SC/ST/OBC students as per Karnataka Social Welfare and Backward Classes Department norms."
+    },
+    {
+        "id": "sch_04",
+        "category": "Scholarships",
+        "patterns": ["Is there a merit scholarship for top performers?", "Academic excellence scholarship", "Rank holder scholarship"],
+        "answer": "Merit scholarships and cash awards are granted to university rank holders, semester toppers, and exemplary academic performers during the annual awards ceremony."
+    },
+    {
+        "id": "sch_05",
+        "category": "Scholarships",
+        "patterns": ["Are scholarships available for girl students / women in tech?", "Pragati scholarship for girls", "Women scholarship"],
+        "answer": "Female students can apply for the AICTE Pragati Scholarship scheme, which grants up to INR 50,000 per annum for tuition assistance, as well as selected corporate CSR scholarships."
+    },
+    {
+        "id": "sch_06",
+        "category": "Scholarships",
+        "patterns": ["Can defense or army ward students get a scholarship?", "Defense quota concession", "Ex-servicemen fee concession"],
+        "answer": "Special considerations and government welfare allowances are applicable for children of defense personnel, ex-servicemen, and paramilitary forces as per central/state guidelines."
+    },
+    {
+        "id": "sch_07",
+        "category": "Scholarships",
+        "patterns": ["Are sports scholarships offered?", "Scholarship for national level athletes", "Sports quota fee waiver"],
+        "answer": "Students with remarkable achievements at state, national, or university athletic championships may be eligible for sports quota concessions upon review by the Physical Education Director."
+    },
+    {
+        "id": "sch_08",
+        "category": "Scholarships",
+        "patterns": ["Whom should I contact for scholarship guidance?", "Scholarship department contact", "College scholarship officer"],
+        "answer": "Please visit the Scholarship Section in the Administrative Block or contact {contact_email} with the subject 'Scholarship Enquiry'."
+    },
+
+    # 6. Examinations & VTU Academic Regulations
+    {
+        "id": "exm_01",
+        "category": "Exams & Academics",
+        "patterns": ["What is the minimum attendance requirement?", "Is 75% attendance mandatory?", "Attendance criteria to write exams", "Shortage of attendance rules"],
+        "answer": "As per VTU regulations, a minimum of 75% attendance in each subject (85% aggregate recommended) is strictly mandatory to be eligible to appear for semester end examinations."
+    },
+    {
+        "id": "exm_02",
+        "category": "Exams & Academics",
+        "patterns": ["How many internal assessments (IA) are conducted per semester?", "Internal test pattern", "How are IA marks calculated?"],
+        "answer": "Typically, three Internal Assessment (IA) tests are conducted per semester. Continuous internal evaluation also includes lab tests, assignments, quizzes, and seminars."
+    },
+    {
+        "id": "exm_03",
+        "category": "Exams & Academics",
+        "patterns": ["What is the grading system in VTU?", "How is SGPA and CGPA calculated?", "VTU grading scale"],
+        "answer": "VTU implements a 10-point grading scale ranging from O (Outstanding - 10) to F (Fail - 0). Semester Grade Point Average (SGPA) and Cumulative Grade Point Average (CGPA) reflect weighted performance across all subjects."
+    },
+    {
+        "id": "exm_04",
+        "category": "Exams & Academics",
+        "patterns": ["What are the passing marks for theory and practical exams?", "Minimum marks to pass VTU exams", "Passing criteria"],
+        "answer": "To pass a course, a student must secure at least 35% in the semester-end examination (SEE) and a combined minimum of 40% aggregate (CIE + SEE) as per VTU CBCS schemes."
+    },
+    {
+        "id": "exm_05",
+        "category": "Exams & Academics",
+        "patterns": ["What is the backlog / arrear exam policy?", "How to clear backlogs?", "Can I write backlog exams with regular semester?"],
+        "answer": "Students with backlogs can register and appear for supplementary/backlog examinations conducted during the odd and even semester university examination cycles."
+    },
+    {
+        "id": "exm_06",
+        "category": "Exams & Academics",
+        "patterns": ["How can I apply for revaluation or photocopy of answer sheets?", "Revaluation procedure", "VTU revaluation fee"],
+        "answer": "When VTU announces exam results, an online revaluation and answer script photocopy window opens for 7-10 days. Applications are submitted via the college exam portal."
+    },
+    {
+        "id": "exm_07",
+        "category": "Exams & Academics",
+        "patterns": ["Where can I check the academic calendar?", "When do semester classes start and end?", "Academic calendar details"],
+        "answer": "The academic calendar detailing semester commencement dates, internal test schedules, vacation periods, and university exam dates is published on the notice board and college portal each term."
+    },
+    {
+        "id": "exm_08",
+        "category": "Exams & Academics",
+        "patterns": ["What is the procedure for medical leave during exams?", "Missed internal test due to medical emergency", "Medical certificate submission"],
+        "answer": "In case of illness during internal tests, students must notify their Class Advisor immediately and submit a verified medical certificate from a registered practitioner to seek a re-test approval."
+    },
+    {
+        "id": "exm_09",
+        "category": "Exams & Academics",
+        "patterns": ["Where can I download my exam hall ticket?", "VTU admit card / hall ticket", "How to get hall ticket?"],
+        "answer": "Exam hall tickets are issued by VTU through the college examination cell. Students who have cleared all dues and met the minimum attendance criteria receive hall tickets 3-5 days before exams."
+    },
+    {
+        "id": "exm_10",
+        "category": "Exams & Academics",
+        "patterns": ["What happens if a student is caught engaging in malpractice?", "Exam malpractice rules", "Cheating in university exams"],
+        "answer": "Examination malpractice is subject to severe disciplinary and university penal action under VTU Malpractice Committee guidelines, including course debars and cancellation of examination performance."
+    },
+
+    # 7. Placements & Career Guidance
+    {
+        "id": "plc_01",
+        "category": "Placements & Training",
+        "patterns": ["How is the placement record of the college?", "What are the placement statistics?", "Placement percentage", "Does the college have good placements?"],
+        "answer": "The college maintains an active Training and Placement Cell that hosts campus recruitment drives with leading IT, core engineering, and consulting firms, achieving consistent placement records year on year."
+    },
+    {
+        "id": "plc_02",
+        "category": "Placements & Training",
+        "patterns": ["Who are the top recruiters visiting the campus?", "Companies hiring from the college", "List of recruiters", "Top placement companies"],
+        "answer": "Top recruiters regularly include leading technology and consulting giants such as Infosys, TCS, Wipro, Capgemini, Cognizant, Accenture, Mindtree, Tech Mahindra, IBM, and numerous emerging startups."
+    },
+    {
+        "id": "plc_03",
+        "category": "Placements & Training",
+        "patterns": ["What is the average package offered in campus placements?", "Average salary package", "Average CTC for engineering graduates"],
+        "answer": "Average salary packages generally range between INR 4.0 LPA to 6.5 LPA for software and engineering roles, with competitive packages offered by specialized tech companies."
+    },
+    {
+        "id": "plc_04",
+        "category": "Placements & Training",
+        "patterns": ["What is the highest package offered?", "Highest salary package in placements", "Maximum CTC offered"],
+        "answer": "The highest packages vary each recruitment season, reaching upwards of INR 12 to 20+ LPA for top-performing students in software engineering and product development roles."
+    },
+    {
+        "id": "plc_05",
+        "category": "Placements & Training",
+        "patterns": ["What is the eligibility criteria to attend campus placements?", "Placement eligibility CGPA", "Who is eligible for campus interviews?"],
+        "answer": "Generally, students with a CGPA of 6.0 and above with no active backlogs are eligible for most recruitment drives. Select tier-1 companies require 7.0+ CGPA and 60%+ in 10th and 12th."
+    },
+    {
+        "id": "plc_06",
+        "category": "Placements & Training",
+        "patterns": ["Does the college provide placement training?", "Aptitude and soft skill training", "Interview preparation classes"],
+        "answer": "Yes, regular pre-placement training starts from the 2nd/3rd year, encompassing quantitative aptitude, logical reasoning, verbal ability, coding workshops, resume building, and mock interviews."
+    },
+    {
+        "id": "plc_07",
+        "category": "Placements & Training",
+        "patterns": ["When do campus placement drives start?", "Placement season timeline", "In which semester do placements begin?"],
+        "answer": "Placement drives commence in the 7th semester (pre-final year transition) and continue throughout the 8th semester until graduation."
+    },
+    {
+        "id": "plc_08",
+        "category": "Placements & Training",
+        "patterns": ["What is the college placement cell contact?", "How to contact the placement officer?", "Placement office location"],
+        "answer": "The Training & Placement Department is located in the Academic Block. You can email the placement team directly at {contact_email}."
+    },
+    {
+        "id": "plc_09",
+        "category": "Placements & Training",
+        "patterns": ["Can students get more than one job offer?", "Dream company offer policy", "Dual offer placement rule"],
+        "answer": "The college operates a fair-share placement policy. Students securing a standard package offer can appear for 'Dream' or 'Super Dream' tier drives if their profile and package difference qualify under placement cell rules."
+    },
+    {
+        "id": "plc_10",
+        "category": "Placements & Training",
+        "patterns": ["Does the college support higher studies (GATE / GRE / CAT)?", "Guidance for higher studies", "Competitive exam preparation"],
+        "answer": "Yes, career guidance seminars, faculty mentorship, and informational sessions for GATE, GRE, TOEFL, and CAT are periodically conducted for students aspiring for higher studies."
+    },
+
+    # 8. Internships & Industry Exposure
+    {
+        "id": "int_01",
+        "category": "Internships",
+        "patterns": ["Are internships mandatory for engineering students?", "VTU internship requirements", "Is internship compulsory in B.Tech?"],
+        "answer": "Yes, under VTU guidelines, completing an industry internship or research internship (typically between semesters 6, 7, and 8) is mandatory to earn degree credits."
+    },
+    {
+        "id": "int_02",
+        "category": "Internships",
+        "patterns": ["Does the college help in getting internships?", "Internship assistance from college", "How to find internships through college?"],
+        "answer": "Yes, the placement and department internship coordinators share verified opportunities, sign MOUs with tech organizations, and provide recommendation letters for student internships."
+    },
+    {
+        "id": "int_03",
+        "category": "Internships",
+        "patterns": ["How do I get an NOC / Bonafide letter for an internship?", "Internship NOC letter", "Permission letter for industry internship"],
+        "answer": "Submit your company offer letter and an application form signed by your Mentor and Head of Department to the Academic Section to receive an official No Objection Certificate (NOC)."
+    },
+    {
+        "id": "int_04",
+        "category": "Internships",
+        "patterns": ["Are industrial visits organized for students?", "Industry visits in engineering", "Factory tours"],
+        "answer": "Yes, every academic department arranges field trips and industrial visits to manufacturing plants, IT enterprises, research labs, and substations each semester."
+    },
+    {
+        "id": "int_05",
+        "category": "Internships",
+        "patterns": ["Can students do virtual or remote internships?", "Online internship approval", "Are remote internships accepted by VTU?"],
+        "answer": "Yes, authorized remote internships from recognized corporations and AICTE-approved virtual platforms (such as AICTE Internship Portal) are accepted subject to departmental review and viva-voce."
+    },
+    {
+        "id": "int_06",
+        "category": "Internships",
+        "patterns": ["Does the college have MoUs with industries?", "Industry partnerships and collaborations", "Corporate tie-ups"],
+        "answer": "Yes, the college maintains active Memorandums of Understanding (MoUs) with established IT firms, robotics companies, and technical training partners for live projects and skill exchange."
+    },
+
+    # 9. Hostels & Accommodation
+    {
+        "id": "hst_01",
+        "category": "Hostel & Living",
+        "patterns": ["Does the college provide hostel facilities?", "Is there a hostel on campus?", "Boys and girls hostel availability"],
+        "answer": "Yes, separate, secure, and well-maintained hostel buildings are provided for both male and female students within close proximity to campus."
+    },
+    {
+        "id": "hst_02",
+        "category": "Hostel & Living",
+        "patterns": ["What is the hostel fee structure?", "How much is the hostel fee per year?", "Cost of hostel accommodation"],
+        "answer": "Hostel fees vary based on the room type (single, double, or triple sharing) and amenities. Fees include lodging, mess meals, water, and electricity. Contact the hostel warden's office for the exact annual tariff."
+    },
+    {
+        "id": "hst_03",
+        "category": "Hostel & Living",
+        "patterns": ["What amenities are available in the hostel rooms?", "Hostel room facilities", "Do hostels have Wi-Fi?"],
+        "answer": "Hostel rooms are furnished with beds, study tables, chairs, and cupboards. Amenities include high-speed Wi-Fi, 24/7 water supply, solar water heaters, power backup, and indoor recreation rooms."
+    },
+    {
+        "id": "hst_04",
+        "category": "Hostel & Living",
+        "patterns": ["What kind of food is served in the hostel mess?", "Hostel mess menu", "Is vegetarian and non-vegetarian food available in mess?"],
+        "answer": "The hostel mess serves hygienic, nutritious vegetarian and non-vegetarian meals following a balanced weekly menu with breakfast, lunch, evening snacks, and dinner."
+    },
+    {
+        "id": "hst_05",
+        "category": "Hostel & Living",
+        "patterns": ["What are the hostel curfew timings?", "Hostel gate closing time", "In-time rules for hostellers"],
+        "answer": "To ensure student safety, hostellers must return to campus by 7:00 PM - 7:30 PM. Late entry requires prior approval from the hostel warden."
+    },
+    {
+        "id": "hst_06",
+        "category": "Hostel & Living",
+        "patterns": ["What is the hostel leave / outing procedure?", "How can hostellers take night out leave?", "Weekend gate pass for hostel"],
+        "answer": "Students requiring home leave or night-outs must apply through a digital leave form or written gate pass with explicit consent from their registered parent or guardian."
+    },
+    {
+        "id": "hst_07",
+        "category": "Hostel & Living",
+        "patterns": ["Are guest rooms available for visiting parents?", "Can parents stay in the hostel?", "Accommodation for parents"],
+        "answer": "Guest rooms are available on campus for visiting parents on a short-term chargeable basis, subject to prior booking with the warden's office."
+    },
+    {
+        "id": "hst_08",
+        "category": "Hostel & Living",
+        "patterns": ["Is there laundry service in the hostel?", "Washing machine facilities in hostel", "Hostel laundry"],
+        "answer": "Yes, paid laundry services and designated washing areas are provided for hostel residents."
+    },
+    {
+        "id": "hst_09",
+        "category": "Hostel & Living",
+        "patterns": ["How is the security in the college hostel?", "Is the hostel safe for girls?", "Hostel security measures"],
+        "answer": "The hostels feature 24/7 security personnel, comprehensive CCTV surveillance in common areas, biometric attendance, and strict resident warden monitoring."
+    },
+    {
+        "id": "hst_10",
+        "category": "Hostel & Living",
+        "patterns": ["Are paying guest (PG) accommodations available near the college?", "PG rooms near campus", "Off-campus housing options"],
+        "answer": "Yes, numerous independent PG accommodations, private hostels, and rental apartments are situated around the Bannerghatta Road and Gottigere area within walking distance."
+    },
+
+    # 10. Campus Facilities & Infrastructure
+    {
+        "id": "fac_01",
+        "category": "Campus Facilities",
+        "patterns": ["Does the college provide Wi-Fi on campus?", "Is Wi-Fi free for students?", "Campus Wi-Fi connectivity"],
+        "answer": "Yes, the entire academic campus and libraries are equipped with secure, high-speed Wi-Fi access available to students and faculty using their student credentials."
+    },
+    {
+        "id": "fac_02",
+        "category": "Campus Facilities",
+        "patterns": ["What are the cafeteria / canteen timings?", "Tell me about the college canteen", "Food options in canteen"],
+        "answer": "The campus cafeteria is open from 8:00 AM to 5:30 PM, serving a wide variety of freshly prepared breakfast items, South Indian and North Indian meals, snacks, and beverages."
+    },
+    {
+        "id": "fac_03",
+        "category": "Campus Facilities",
+        "patterns": ["Is there a medical room or healthcare clinic on campus?", "First aid facility", "Emergency medical support"],
+        "answer": "Yes, a dedicated Health Center with first-aid provisions, basic diagnostic equipment, and an on-call medical practitioner is available on campus. Nearby hospitals are tied up for emergencies."
+    },
+    {
+        "id": "fac_04",
+        "category": "Campus Facilities",
+        "patterns": ["Are computer labs accessible after class hours?", "Computer lab facilities", "Lab timings"],
+        "answer": "Advanced computer laboratories with updated hardware, Linux/Windows operating environments, and high-speed internet are available from 8:30 AM to 5:30 PM on all instructional days."
+    },
+    {
+        "id": "fac_05",
+        "category": "Campus Facilities",
+        "patterns": ["Is there an ATM or banking facility nearby?", "ATM on campus", "Bank facility"],
+        "answer": "An ATM is situated near the main campus entrance, and several leading bank branches (SBI, HDFC, Canara Bank) are located within a 500-meter radius."
+    },
+    {
+        "id": "fac_06",
+        "category": "Campus Facilities",
+        "patterns": ["Is there vehicle parking available on campus?", "Two wheeler and car parking", "Parking charges for students"],
+        "answer": "Yes, ample designated parking bays are provided inside the campus gates for two-wheelers and four-wheelers of both students and faculty members. Valid parking stickers may be required."
+    },
+    {
+        "id": "fac_07",
+        "category": "Campus Facilities",
+        "patterns": ["Is there an auditorium or seminar hall?", "Auditorium capacity", "Seminar halls on campus"],
+        "answer": "The campus boasts modern air-conditioned auditoriums and multiple multimedia seminar halls equipped with advanced acoustics, projection systems, and conferencing tools."
+    },
+    {
+        "id": "fac_08",
+        "category": "Campus Facilities",
+        "patterns": ["Is the campus disabled / differently-abled friendly?", "Ramps and elevators on campus", "Accessibility features"],
+        "answer": "Yes, academic buildings are equipped with ramps, accessible elevators, and reserved facilities to support differently-abled students and staff."
+    },
+    {
+        "id": "fac_09",
+        "category": "Campus Facilities",
+        "patterns": ["Are photocopy and stationery stores available inside the campus?", "Xerox shop on campus", "Stationery store timings"],
+        "answer": "Yes, an on-campus stationery and reprographics shop is open during college hours for photocopying, printing, binding, and essential academic supplies."
+    },
+    {
+        "id": "fac_10",
+        "category": "Campus Facilities",
+        "patterns": ["Does the college have green energy or sustainability initiatives?", "Solar power on campus", "Eco-friendly campus initiatives"],
+        "answer": "The institution promotes green campus initiatives including rooftop solar power installations, rainwater harvesting pits, comprehensive waste segregation, and lush tree plantations."
+    },
+
+    # 11. Transportation & Bus Services
+    {
+        "id": "trn_01",
+        "category": "Transport",
+        "patterns": ["Does the college offer bus transportation for students?", "College bus service", "Is college bus available?"],
+        "answer": "Yes, a fleet of college buses operates across key arterial routes in Bengaluru, connecting major residential neighborhoods directly to the campus."
+    },
+    {
+        "id": "trn_02",
+        "category": "Transport",
+        "patterns": ["Which routes do the college buses cover?", "Bus routes list", "Does college bus come to Majestic / Silk Board / Electronic City?"],
+        "answer": "Routes cover prime locations including Majestic, Banashankari, Silk Board, BTM Layout, Electronic City, Jayanagar, Kengeri, and Kanakapura Road. Specific route charts are published before every semester."
+    },
+    {
+        "id": "trn_03",
+        "category": "Transport",
+        "patterns": ["What is the bus fee for the college bus?", "Transportation fee per year", "How much does the bus pass cost?"],
+        "answer": "Bus fees depend on the pickup location and route distance. Payment is billed annually. Please consult the Transport Coordinator in the Administrative Block for exact zonal fares."
+    },
+    {
+        "id": "trn_04",
+        "category": "Transport",
+        "patterns": ["How do I get a BMTC student concessional bus pass?", "BMTC bus pass signing", "BMTC concession form"],
+        "answer": "Students can apply online on the Seva Sindhu / BMTC student pass portal. The college administrative section endorses student details for BMTC concession passes."
+    },
+    {
+        "id": "trn_05",
+        "category": "Transport",
+        "patterns": ["What are the morning and evening bus timings?", "College bus schedule", "When do buses leave campus?"],
+        "answer": "Buses arrive on campus around 8:30 AM to 8:45 AM each morning and depart campus promptly at 4:45 PM after evening class hours."
+    },
+    {
+        "id": "trn_06",
+        "category": "Transport",
+        "patterns": ["Is college bus transportation safe?", "GPS tracking in college buses", "Bus safety measures"],
+        "answer": "Yes, all buses are driven by experienced institutional drivers, speed-governed, equipped with emergency first aid, and regularly inspected according to regional transport authority norms."
+    },
+    {
+        "id": "trn_07",
+        "category": "Transport",
+        "patterns": ["Can day scholars switch bus routes mid-semester?", "Change of bus route", "Can I update my pickup stop?"],
+        "answer": "Route changes are allowed if seating is available on the requested route and upon approval from the Transport In-charge with any applicable fee adjustments."
+    },
+
+    # 12. Library & Information Resources
+    {
+        "id": "lib_01",
+        "category": "Library",
+        "patterns": ["What are the library timings?", "When is the college library open?", "Library working hours"],
+        "answer": "The Central Library is open from 8:30 AM to 6:00 PM on all working days, with extended study room hours during university examination periods."
+    },
+    {
+        "id": "lib_02",
+        "category": "Library",
+        "patterns": ["How many books can a student borrow from the library?", "Book borrowing limit", "Library card rules"],
+        "answer": "Undergraduate students can borrow up to 3 to 4 books simultaneously for an initial loan period of 14 days, renewable if no reservations are pending."
+    },
+    {
+        "id": "lib_03",
+        "category": "Library",
+        "patterns": ["Does the library provide digital journals and e-books?", "Digital library facilities", "IEEE explore access", "E-resource access"],
+        "answer": "Yes, the digital library subscribes to VTU Consortium e-resources, including IEEE Xplore, ScienceDirect, Springer, ASCE, and thousands of national and international e-journals and e-books."
+    },
+    {
+        "id": "lib_04",
+        "category": "Library",
+        "patterns": ["What is the overdue fine for late return of library books?", "Library fine policy", "Penalty for late book return"],
+        "answer": "A nominal fine of INR 1 to 2 per book per day is charged for books returned past the due date to ensure fair circulation among all students."
+    },
+    {
+        "id": "lib_05",
+        "category": "Library",
+        "patterns": ["Can students access previous years question papers in the library?", "Previous year VTU exam papers", "Model question papers in library"],
+        "answer": "Yes, the library maintains an extensive repository of bound volumes and digital copies of VTU question papers from past semesters for student reference."
+    },
+    {
+        "id": "lib_06",
+        "category": "Library",
+        "patterns": ["Is there a reference section or quiet reading room?", "Library reading hall", "Study hall in library"],
+        "answer": "Yes, the library has a spacious, air-ventilated silent reading hall with a seating capacity for over 200 students."
+    },
+    {
+        "id": "lib_07",
+        "category": "Library",
+        "patterns": ["Is there a book bank facility for SC / ST students?", "Book bank scheme", "Free textbook scheme for students"],
+        "answer": "Yes, a dedicated SC/ST and Merit Book Bank Scheme allows eligible students to borrow a complete textbook set for the entire semester duration free of cost."
+    },
+    {
+        "id": "lib_08",
+        "category": "Library",
+        "patterns": ["Does the library provide plagiarism checking software?", "Turnitin or Urkund access", "Project thesis plagiarism check"],
+        "answer": "Yes, the Central Library provides authorized plagiarism detection tools (such as DrillBit/Turnitin) to check final year B.E., M.Tech, and Ph.D. project reports."
+    },
+
+    # 13. Student Clubs, Extracurriculars & Fests
+    {
+        "id": "clb_01",
+        "category": "Student Life & Clubs",
+        "patterns": ["What is the annual cultural fest of the college?", "College fest details", "When is the college annual festival celebrated?"],
+        "answer": "The college organizes a vibrant annual inter-collegiate cultural fest featuring music concerts, dance battles, fashion shows, street plays, gaming arenas, and celebrity performances."
+    },
+    {
+        "id": "clb_02",
+        "category": "Student Life & Clubs",
+        "patterns": ["What student technical clubs exist?", "Coding clubs in college", "Robotics club details", "Technical societies"],
+        "answer": "Active student clubs include the Coding and Open Source Club, Robotics & IoT Guild, IEEE Student Branch, Google Developer Student Clubs (GDSC), and AI Club."
+    },
+    {
+        "id": "clb_03",
+        "category": "Student Life & Clubs",
+        "patterns": ["How can I join a student club?", "Club registration process", "Can first year students join clubs?"],
+        "answer": "Club membership orientations and recruitment drives are conducted during the first few weeks of the academic semester. Any enrolled student is eligible to join."
+    },
+    {
+        "id": "clb_04",
+        "category": "Student Life & Clubs",
+        "patterns": ["Are hackathons and project exhibitions conducted?", "Annual hackathon", "College project exhibition"],
+        "answer": "Yes, 24-hour hackathons, code sprints, ideathons, and national level project exhibitions are regularly hosted with industry prizes and cash awards."
+    },
+    {
+        "id": "clb_05",
+        "category": "Student Life & Clubs",
+        "patterns": ["Is there an active NSS or social service unit?", "NSS activities in college", "Social welfare clubs"],
+        "answer": "Yes, an active National Service Scheme (NSS) unit organizes blood donation drives, tree plantation campaigns, health checkup camps, and rural literacy awareness programs."
+    },
+    {
+        "id": "clb_06",
+        "category": "Student Life & Clubs",
+        "patterns": ["Is there a photography or media club?", "Drama club and creative arts", "Literary and debating society"],
+        "answer": "Yes, creative clubs including the Photography Club, Music & Drama Ensemble, and Literary & Debating Society give students platforms to express their artistic talents."
+    },
+    {
+        "id": "clb_07",
+        "category": "Student Life & Clubs",
+        "patterns": ["Is there an Entrepreneurship and Incubation Cell?", "E-cell in college", "Startup support for students"],
+        "answer": "Yes, the Entrepreneurship Development Cell (EDC) and Incubation Center support student innovators with mentorship, patent filing assistance, and seed funding connections."
+    },
+    {
+        "id": "clb_08",
+        "category": "Student Life & Clubs",
+        "patterns": ["Does the college celebrate cultural days and ethnic events?", "Ethnic day celebration", "Onam / Diwali / Kannada Rajyotsava in college"],
+        "answer": "Yes, festive and cultural traditions including Kannada Rajyotsava, Onam, Ethnic Day, Teachers Day, and Engineer's Day are celebrated enthusiastically by students and faculty."
+    },
+
+    # 14. Sports & Fitness
+    {
+        "id": "spt_01",
+        "category": "Sports & Fitness",
+        "patterns": ["What sports facilities are available on campus?", "College sports amenities", "Playgrounds in college"],
+        "answer": "The campus features extensive outdoor grounds for cricket, football, volleyball, and basketball, along with indoor facilities for table tennis, badminton, chess, and carrom."
+    },
+    {
+        "id": "spt_02",
+        "category": "Sports & Fitness",
+        "patterns": ["Is there a gymnasium on campus?", "Gym facilities and timings", "Is there a fitness center?"],
+        "answer": "Yes, a well-equipped gymnasium with modern cardio and weight training equipment is available for students and staff during morning (6:30 AM – 8:00 AM) and evening (4:30 PM – 6:30 PM) hours."
+    },
+    {
+        "id": "spt_03",
+        "category": "Sports & Fitness",
+        "patterns": ["Does the college participate in VTU inter-collegiate sports meets?", "VTU sports tournaments", "Can students represent college in athletics?"],
+        "answer": "Yes, student athletes and teams are coached by qualified physical education directors to compete in VTU inter-collegiate tournaments, state championships, and university leagues."
+    },
+    {
+        "id": "spt_04",
+        "category": "Sports & Fitness",
+        "patterns": ["When is the Annual Sports Day held?", "College sports meet", "Sports day competitions"],
+        "answer": "The Annual Sports Day is held in the even semester, featuring track and field events, inter-departmental tournaments, and medals for winning athletes."
+    },
+    {
+        "id": "spt_05",
+        "category": "Sports & Fitness",
+        "patterns": ["Are coaches available for different sports?", "Sports trainers in college", "Cricket / football coaching"],
+        "answer": "The Department of Physical Education employs dedicated sports instructors who oversee training routines, selections, and match fixtures."
+    },
+    {
+        "id": "spt_06",
+        "category": "Sports & Fitness",
+        "patterns": ["Can students use sports equipment during free hours?", "How to borrow sports equipment?", "Sports equipment issue"],
+        "answer": "Students can borrow sports gear and equipment from the Physical Education Department by presenting their valid student identity card."
+    },
+
+    # 15. Anti-Ragging & Disciplinary Policies
+    {
+        "id": "rag_01",
+        "category": "Discipline & Safety",
+        "patterns": ["What is the college policy on ragging?", "Is ragging banned on campus?", "Anti-ragging policy"],
+        "answer": "Ragging in any form is strictly prohibited on campus, in hostels, and in transit. {name} maintains a zero-tolerance policy in full compliance with Supreme Court directives and UGC guidelines."
+    },
+    {
+        "id": "rag_02",
+        "category": "Discipline & Safety",
+        "patterns": ["How do I report an incident of ragging?", "Anti-ragging helpline number", "Where to lodge ragging complaint?"],
+        "answer": "Ragging can be reported instantly to the Anti-Ragging Squad, the Principal's office, or via the National Anti-Ragging Helpline at {anti_ragging_helpline}. Anonymity of the complainant is guaranteed."
+    },
+    {
+        "id": "rag_03",
+        "category": "Discipline & Safety",
+        "patterns": ["Is there an Internal Complaints Committee (ICC) / Women Grievance Cell?", "Women harassment prevention cell", "ICC committee details"],
+        "answer": "Yes, an Internal Complaints Committee (ICC) and Women Empowerment Cell function actively to investigate gender-based grievances and ensure a safe, respectful environment for all female students and staff."
+    },
+    {
+        "id": "rag_04",
+        "category": "Discipline & Safety",
+        "patterns": ["What is the college dress code?", "Is there a uniform in college?", "Dress code guidelines"],
+        "answer": "Students are required to wear formal or neat semi-formal attire on campus. Uniform or lab coats are mandatory during engineering laboratory sessions and university examinations."
+    },
+    {
+        "id": "rag_05",
+        "category": "Discipline & Safety",
+        "patterns": ["Is wearing student ID cards mandatory on campus?", "ID card rules", "Lost student ID card replacement"],
+        "answer": "Yes, students must prominently display their valid RFID identity card at all times inside the campus. Lost ID cards can be re-issued through the Administrative Office after submitting an application and nominal fee."
+    },
+    {
+        "id": "rag_06",
+        "category": "Discipline & Safety",
+        "patterns": ["Is smoking, vaping, or alcohol consumption permitted on campus?", "Substance abuse policy", "Drug policy on campus"],
+        "answer": "The campus is a strictly designated alcohol-, tobacco-, and drug-free zone. Any violation results in immediate suspension, disciplinary hearing, and potential police reporting."
+    },
+
+    # 16. Certificates, Transcripts & Alumni
+    {
+        "id": "adm_srv_01",
+        "category": "Student Services",
+        "patterns": ["How can I obtain a Bonafide Certificate?", "Bonafide letter application", "How long does it take to get a bonafide?"],
+        "answer": "Apply at the student counter in the Administrative Block with your student ID and admission number. Bonafide certificates are usually delivered within 1 to 2 working days."
+    },
+    {
+        "id": "adm_srv_02",
+        "category": "Student Services",
+        "patterns": ["How do I apply for official transcripts for foreign university applications?", "VTU transcripts procedure", "College transcript application"],
+        "answer": "Transcripts are issued jointly with VTU. Students submit an application form along with photocopies of all semester grade cards and fee payment to the examination section or directly via the VTU portal."
+    },
+    {
+        "id": "adm_srv_03",
+        "category": "Student Services",
+        "patterns": ["How to apply for a Transfer Certificate (TC) and Migration Certificate?", "Getting TC after graduation", "Migration certificate process"],
+        "answer": "Graduating or withdrawing students can submit a No Dues Clearance form to the Academic Registrar to receive their Transfer Certificate (TC) and Migration Certificate."
+    },
+    {
+        "id": "adm_srv_04",
+        "category": "Student Services",
+        "patterns": ["Is there an active Alumni Association?", "How can alumni connect with the college?", "Alumni network"],
+        "answer": "Yes, the {short_name} Alumni Association actively organizes annual alumni meets, guest lectures, mentorship drives, and networking dinners for graduates."
+    },
+    {
+        "id": "adm_srv_05",
+        "category": "Student Services",
+        "patterns": ["How do I get a recommendation letter (LOR) from faculty?", "Letter of recommendation for MS", "LOR application procedure"],
+        "answer": "Contact your respective department professors and HOD with your updated CV, statement of purpose, and academic records at least two weeks before your application deadlines."
+    },
+    {
+        "id": "adm_srv_06",
+        "category": "Student Services",
+        "patterns": ["How do I update my registered contact number or residential address?", "Change in student contact details", "Update email address in college records"],
+        "answer": "Submit a written request along with parent endorsement and proof of address change to the Student Records Section in the main administrative block."
+    },
+
+    # 17. Departments & Technical Labs
+    {
+        "id": "dept_01",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about the Computer Science Department", "CSE department facilities", "CSE faculty and labs"],
+        "answer": "The Department of Computer Science & Engineering is staffed with qualified faculty and features specialized labs for Data Structures, Algorithms, Artificial Intelligence, Database Management, and Networking."
+    },
+    {
+        "id": "dept_02",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about the Electronics and Communication Department", "ECE department details", "ECE labs"],
+        "answer": "The ECE department offers advanced laboratories for VLSI Design, Digital Signal Processing, Embedded Systems, Microwave Engineering, and Analog & Digital Communications."
+    },
+    {
+        "id": "dept_03",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about Information Science and Engineering", "ISE department overview", "ISE courses"],
+        "answer": "The ISE department prepares students for modern software careers, focusing on Web Technologies, Cloud Architecture, Mobile App Development, and Cyber Security."
+    },
+    {
+        "id": "dept_04",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about the Civil Engineering Department", "Civil engineering labs", "Civil branch details"],
+        "answer": "The Civil Engineering department is equipped with state-of-the-art Surveying Labs, Concrete Technology, Geotechnical Engineering, Environmental Engineering, and Computer-Aided Design (CAD) facilities."
+    },
+    {
+        "id": "dept_05",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about the Mechanical Engineering Department", "Mechanical workshops", "CAD CAM lab"],
+        "answer": "The Mechanical Engineering department includes specialized Foundry & Forging shops, Machine Shops, Fluid Mechanics Labs, Heat Transfer Labs, and CAD/CAM modeling suites."
+    },
+    {
+        "id": "dept_06",
+        "category": "Departments & Labs",
+        "patterns": ["Tell me about the Basic Science and Humanities Department", "First year engineering faculty", "Physics and Chemistry labs"],
+        "answer": "The Department of Basic Sciences and Humanities nurtures first-year engineering students through well-equipped Engineering Physics, Engineering Chemistry, and Professional English Communication labs."
+    },
+
+    # 18. Student Mentorship & Counseling
+    {
+        "id": "men_01",
+        "category": "Student Support",
+        "patterns": ["Is there a proctor or mentor system for students?", "How does student mentoring work?", "Who is my faculty proctor?"],
+        "answer": "Yes, every student is assigned a dedicated Faculty Mentor / Proctor who monitors their academic progress, attendance, and personal well-being throughout their 4-year tenure."
+    },
+    {
+        "id": "men_02",
+        "category": "Student Support",
+        "patterns": ["Is mental health or psychological counseling available?", "Student counseling center", "Stress management counseling"],
+        "answer": "Yes, confidential counseling services and wellness workshops are available on campus to assist students facing academic stress, anxiety, or personal adjustment hurdles."
+    },
+    {
+        "id": "men_03",
+        "category": "Student Support",
+        "patterns": ["Are parents notified about attendance shortages or poor test marks?", "Parent teacher meetings", "How do parents track student performance?"],
+        "answer": "Yes, parent SMS alerts, regular postal/email progress reports, and semester Parent-Teacher Association (PTA) meetings ensure parents are kept informed of academic standing."
+    },
+    {
+        "id": "men_04",
+        "category": "Student Support",
+        "patterns": ["Is there a grievance redressal portal?", "How can students submit complaints?", "Student grievance cell"],
+        "answer": "Students can register academic, administrative, or facility grievances via the Student Grievance Redressal Portal or drop written representations into suggestion boxes situated across campus."
+    },
+
+    # 19. Events, Workshops & Seminars
+    {
+        "id": "evt_01",
+        "category": "Events & Seminars",
+        "patterns": ["Are international conferences or symposiums organized?", "Engineering conferences on campus", "National symposiums"],
+        "answer": "Yes, various departments organize National and International Conferences annually where researchers, scholars, and industry leaders present cutting-edge technical papers."
+    },
+    {
+        "id": "evt_02",
+        "category": "Events & Seminars",
+        "patterns": ["Are guest lectures conducted by industry experts?", "Invited talks by industry leaders", "Seminars and workshops"],
+        "answer": "Weekly and monthly technical talks, webinar series, and workshops by senior executives and technology innovators from top multinationals are standard across all departments."
+    },
+    {
+        "id": "evt_03",
+        "category": "Events & Seminars",
+        "patterns": ["What is the Student Induction Program (SIP) for freshers?", "First year orientation program", "Induction program details"],
+        "answer": "In accordance with AICTE norms, incoming first-year students participate in a 3-week Student Induction Program covering human values, creative arts, campus familiarization, and bridge modules."
+    },
+    {
+        "id": "evt_04",
+        "category": "Events & Seminars",
+        "patterns": ["Is there a graduation day ceremony?", "Convocation day details", "When is graduation day held?"],
+        "answer": "Yes, an official Graduation Day ceremony is celebrated annually to honor outgoing graduates with degree certificates and academic excellence medals."
+    },
+
+    # 20. FAQs on Research & Innovations
+    {
+        "id": "res_01",
+        "category": "Research & Innovation",
+        "patterns": ["Does the college offer research grants or funding for student projects?", "Student project funding", "KSCST project grants"],
+        "answer": "Yes, deserving student final-year projects receive institutional support and guidance to apply for government grants like the Karnataka State Council for Science and Technology (KSCST)."
+    },
+    {
+        "id": "res_02",
+        "category": "Research & Innovation",
+        "patterns": ["Can students file patents through the college?", "Intellectual property rights (IPR) cell", "Patent filing support"],
+        "answer": "Yes, the college IPR Cell provides legal consultation, documentation assistance, and financial subsidies for faculty and students filing novel intellectual property patents."
+    },
+    {
+        "id": "res_03",
+        "category": "Research & Innovation",
+        "patterns": ["Are students encouraged to publish research papers?", "Paper publishing in IEEE or Scopus", "How to publish an engineering paper?"],
+        "answer": "Faculty mentors guide pre-final and final-year students in drafting, revising, and presenting research papers at peer-reviewed IEEE, Springer, and Scopus-indexed conferences and journals."
+    },
+
+    # 21. Campus Life & Miscellaneous FAQs
+    {
+        "id": "mis_01",
+        "category": "Campus Life",
+        "patterns": ["What is the campus life like?", "How is life as a student in the college?", "Student experience"],
+        "answer": "Campus life is a balanced blend of academic rigor, technical exploration, cultural festivities, sports competitions, and peer friendships in a multicultural student community."
+    },
+    {
+        "id": "mis_02",
+        "category": "Campus Life",
+        "patterns": ["Is mobile phone usage allowed in classrooms?", "Cell phone policy on campus", "Can I carry my laptop?"],
+        "answer": "Students may carry smartphones and laptops for academic purposes, but phone usage during lectures, laboratory sessions, and examinations is strictly restricted."
+    },
+    {
+        "id": "mis_03",
+        "category": "Campus Life",
+        "patterns": ["Are stationery or project printing facilities available near the campus?", "Project binding and printing near college"],
+        "answer": "Yes, high-speed Xerox, spiral binding, and project hard-cover printing centers are available both within the campus premises and directly across the main college entrance."
+    },
+    {
+        "id": "mis_04",
+        "category": "Campus Life",
+        "patterns": ["Are there cultural student clubs for dance, music, and art?", "Fine arts club", "College dance team"],
+        "answer": "Yes, passionate students can audition for the college dance crew, acoustic music band, theatre troupe, or photography collective that represent the institution at external university festivals."
+    },
+    {
+        "id": "mis_05",
+        "category": "Campus Life",
+        "patterns": ["What should I do if I lose an item on campus?", "Lost and found department", "Where to find lost belongings?"],
+        "answer": "All items found on campus are submitted to the Security Office or Administrative Front Desk. Students who have lost possessions should register an inquiry there promptly."
+    },
+    {
+        "id": "mis_06",
+        "category": "Campus Life",
+        "patterns": ["Is there an on-campus store for lab manuals and notebooks?", "College book store", "Where to buy lab record books?"],
+        "answer": "Yes, authorized department lab manuals, calculation record notebooks, and branded stationary are sold at subsidized student rates in the campus bookstore."
+    },
+
+    # 22. Additional Common Student Questions
+    {
+        "id": "add_01",
+        "category": "General Information",
+        "patterns": ["Who is the head of the institution?", "Who is the principal?", "Principal name"],
+        "answer": "The college is headed by the Principal along with experienced Heads of Departments (HODs). Check the official website or administrative board for the current leadership directory."
+    },
+    {
+        "id": "add_02",
+        "category": "Admissions",
+        "patterns": ["Can I get admission without KCET or COMEDK?", "Non entrance admission", "Can I join directly through marks?"],
+        "answer": "Eligible candidates can apply for direct management seats based on 10+2 marks in Physics, Maths, and relevant science subjects, as permissible under state guidelines."
+    },
+    {
+        "id": "add_03",
+        "category": "Admissions",
+        "patterns": ["Are diploma to degree courses available?", "B.Tech for working professionals", "Evening engineering courses"],
+        "answer": "The college currently conducts full-time regular undergraduate degree programs. Please consult the admissions office for any upcoming specialized evening or working professional cohorts."
+    },
+    {
+        "id": "add_04",
+        "category": "Exams & Academics",
+        "patterns": ["How are grade points converted to percentage in VTU?", "VTU CGPA to percentage formula", "Percentage conversion equation"],
+        "answer": "As per VTU CBCS guidelines, the equivalent percentage is computed using the standard formula: Percentage (%) = [CGPA - 0.75] * 10."
+    },
+    {
+        "id": "add_05",
+        "category": "Exams & Academics",
+        "patterns": ["What is fast track or make up semester?", "VTU supplementary semester", "Fast track exam rules"],
+        "answer": "VTU occasionally schedules supplementary or fast-track semester offerings for eligible senior students with backlogs. Details are circulated by the academic registrar per VTU notifications."
+    },
+    {
+        "id": "add_06",
+        "category": "Placements & Training",
+        "patterns": ["Are internships provided with stipend?", "Paid internships for students", "Stipend amount in internships"],
+        "answer": "Many partnering technology firms and startups offer paid internships with monthly stipends ranging from INR 10,000 to INR 35,000 based on technical skill and interview rounds."
+    },
+    {
+        "id": "add_07",
+        "category": "Placements & Training",
+        "patterns": ["Can mechanical and civil students attend IT company placements?", "Non-IT branch placements in software companies", "Core branch IT eligibility"],
+        "answer": "Yes, many prominent software recruiters (e.g. Infosys, TCS, Cognizant, Wipro) permit students from all engineering branches to participate provided they meet academic criteria."
+    },
+    {
+        "id": "add_08",
+        "category": "Campus Facilities",
+        "patterns": ["Is the campus covered under CCTV surveillance?", "Campus security cameras", "Are classrooms monitored?"],
+        "answer": "Yes, 24/7 high-definition CCTV surveillance covers campus gates, corridors, examination halls, laboratories, and common hostel premises for campus safety."
+    },
+    {
+        "id": "add_09",
+        "category": "Transport",
+        "patterns": ["Are college buses air-conditioned?", "AC bus facility", "Bus amenities"],
+        "answer": "The regular transit fleet comprises standard, comfortable non-AC buses. Inquiries regarding premium services can be made to the transport administrative desk."
+    },
+    {
+        "id": "add_10",
+        "category": "Hostel & Living",
+        "patterns": ["Is drinking water safe in hostels and campus?", "RO water purifier availability", "Drinking water facility"],
+        "answer": "Yes, commercial reverse osmosis (RO) drinking water purifiers and water coolers are installed on each floor of all academic blocks and student hostels."
+    },
+    {
+        "id": "add_11",
+        "category": "Student Services",
+        "patterns": ["How do I get a recommendation for passport application?", "Student verification for passport", "Bonafide for passport"],
+        "answer": "Bring your passport application form and college ID to the Registrar's Office to receive a student verification certificate for passport issuance."
+    },
+    {
+        "id": "add_12",
+        "category": "Student Services",
+        "patterns": ["How can I get my duplicate marks card if I lose mine?", "Lost VTU marks card", "Duplicate grade sheet"],
+        "answer": "For lost university grade cards, an application must be submitted to VTU Belagavi along with an affidavit, police lost property complaint, and prescribed university fee."
+    },
+    {
+        "id": "add_13",
+        "category": "General Information",
+        "patterns": ["What is the college code for KCET counselling?", "KEA college code", "KCET code for engineering"],
+        "answer": "Please verify the designated KEA/KCET college code in the official Karnataka Examination Authority brochure or contact the college admissions helpline ({helpline})."
+    },
+    {
+        "id": "add_14",
+        "category": "General Information",
+        "patterns": ["What is the COMEDK college code?", "COMEDK code", "College code for COMEDK counselling"],
+        "answer": "Please check the current COMEDK seat selection seat-matrix document or contact our admissions desk at {admissions_email} to verify the COMEDK institutional code."
+    },
+    {
+        "id": "add_15",
+        "category": "Admissions",
+        "patterns": ["Can students transfer from another engineering college into TJIT?", "College transfer procedure", "Inter-college transfer under VTU"],
+        "answer": "College transfers are permitted under VTU change-of-college guidelines at the beginning of the 3rd or 5th semester, subject to NOCs from both institutions and vacancy confirmation."
+    },
+    {
+        "id": "add_16",
+        "category": "Courses & Academics",
+        "patterns": ["Is French or foreign language training offered?", "Foreign language classes", "German / Japanese training in college"],
+        "answer": "Foreign language workshops (such as German or Japanese) are occasionally offered through language clubs and career enrichment partnerships to enhance global employability."
+    },
+    {
+        "id": "add_17",
+        "category": "Library",
+        "patterns": ["Can alumni use the college library?", "Alumni library membership", "Library access for passed out students"],
+        "answer": "Alumni are welcome to use the Central Library reference section for on-site study upon showing their registered alumni identity badge."
+    },
+    {
+        "id": "add_18",
+        "category": "Discipline & Safety",
+        "patterns": ["Whom should parents contact in case of an emergency regarding a student?", "Emergency contact for parents", "College emergency number"],
+        "answer": "In urgent situations, parents should contact the Student Proctor, Department Head, or call the 24/7 administrative helpline at {phone}."
+    },
+    {
+        "id": "add_19",
+        "category": "Fees & Payments",
+        "patterns": ["Can I get an income tax 80E certificate for tuition fees?", "Tax deduction certificate for fees", "Fee certificate for parent IT filing"],
+        "answer": "Yes, the Accounts Department issues official fee receipts containing the necessary institution PAN and details needed for Income Tax deduction under applicable provisions."
+    },
+    {
+        "id": "add_20",
+        "category": "Campus Facilities",
+        "patterns": ["Are electric vehicle (EV) charging spots available?", "EV charging on campus", "Can I charge my electric scooter at college?"],
+        "answer": "Designated charging points for electric two-wheelers are being introduced across campus parking zones. Inquire at the maintenance section for access."
+    }
+]
+
+data = {
+    "college_info": college_info,
+    "faqs": faqs
+}
+
+print(f"Total FAQs count: {len(faqs)}")
+
+output_path = os.path.join(os.getcwd(), "questions.json")
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+
+print(f"Saved {len(faqs)} FAQs to {output_path}")

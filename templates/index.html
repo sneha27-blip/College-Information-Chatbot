@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ college_info.short_name or 'College' }} Information Chatbot - Virtual Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="chat-app-body">
+    <!-- Mobile Header Bar -->
+    <header class="mobile-navbar">
+        <button id="sidebarToggleBtn" class="icon-btn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-brand-title">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>{{ college_info.short_name }} Assistant</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="mobile-logout-btn" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
+    </header>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="college-brand">
+                    <div class="brand-avatar">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div class="brand-info">
+                        <h3>{{ college_info.name }}</h3>
+                        <span class="affiliation-badge">{{ college_info.short_name }} • VTU Affiliated</span>
+                    </div>
+                </div>
+                <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Close Sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Student Profile Card -->
+            <div class="user-profile-card">
+                <div class="user-avatar-circle">
+                    <span>{{ user.full_name[0] | upper }}</span>
+                </div>
+                <div class="user-details">
+                    <h4 class="user-name">{{ user.full_name }}</h4>
+                    <span class="user-dept">{{ user.department }}</span>
+                    <span class="user-email"><i class="fa-regular fa-envelope"></i> {{ user.email }}</span>
+                </div>
+            </div>
+
+            <!-- Quick Category Filters / FAQs Explorer -->
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>EXPLORE TOPICS (100+ FAQs)</span>
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div class="categories-list">
+                    {% for cat in categories %}
+                    <button class="category-chip" data-category="{{ cat }}">
+                        <i class="fa-solid fa-circle-dot"></i>
+                        <span>{{ cat }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- College Contact Card -->
+            <div class="sidebar-section contact-card">
+                <div class="section-title">
+                    <span>OFFICE & HELPLINE</span>
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <p><i class="fa-solid fa-phone"></i> {{ college_info.phone }}</p>
+                <p><i class="fa-solid fa-envelope"></i> {{ college_info.contact_email }}</p>
+                <p><i class="fa-solid fa-clock"></i> 9:00 AM – 4:30 PM</p>
+            </div>
+
+            <!-- Sidebar Footer Actions -->
+            <div class="sidebar-footer">
+                <button id="clearChatBtn" class="btn-sidebar-action btn-clear-chat" title="Clear all chat history">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Clear Chat History</span>
+                </button>
+                <a href="{{ url_for('logout') }}" class="btn-sidebar-action btn-logout" title="Sign out of student account">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <!-- Chat Topbar -->
+            <div class="chat-topbar">
+                <div class="bot-status-wrapper">
+                    <div class="bot-avatar-header">
+                        <i class="fa-solid fa-robot"></i>
+                        <span class="status-indicator"></span>
+                    </div>
+                    <div class="bot-title-text">
+                        <h3>{{ college_info.short_name }} Virtual Advisor</h3>
+                        <span class="bot-subtitle">Online • Fast Local NLP Matching</span>
+                    </div>
+                </div>
+
+                <div class="topbar-actions">
+                    <a href="tel:{{ college_info.phone }}" class="action-pill" title="Call College Helpline">
+                        <i class="fa-solid fa-phone"></i>
+                        <span class="pill-text">{{ college_info.phone }}</span>
+                    </a>
+                    <a href="{{ college_info.official_website }}" target="_blank" rel="noopener noreferrer" class="action-pill" title="Visit College Website">
+                        <i class="fa-solid fa-globe"></i>
+                        <span class="pill-text">Official Website</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div class="welcome-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h2>Welcome to {{ college_info.name }} Information Portal</h2>
+                    <p>Ask anything about admissions, courses, fees, placements, exams, hostel, scholarships, or transport. Your conversation history is saved securely.</p>
+                    
+                    <!-- Quick Prompt Suggestions Grid -->
+                    <div class="suggestions-header">
+                        <span><i class="fa-solid fa-wand-magic-sparkles"></i> Popular questions you can ask:</span>
+                    </div>
+                    <div class="suggestions-grid">
+                        <button class="suggestion-chip" data-question="What undergraduate courses and B.Tech branches are offered?">
+                            <i class="fa-solid fa-book"></i> What courses are offered?
+                        </button>
+                        <button class="suggestion-chip" data-question="What is the admission procedure for engineering?">
+                            <i class="fa-solid fa-user-graduate"></i> Admission procedure
+                        </button>
+                        <button class="suggestion-chip" data-question="What are the top recruiters and placement statistics?">
+                            <i class="fa-solid fa-briefcase"></i> Placement statistics
+                        </button>
+                        <button class="suggestion-chip" data-question="What is the minimum attendance requirement for VTU exams?">
+                            <i class="fa-solid fa-clipboard-check"></i> Attendance rules (75%)
+                        </button>
+                        <button class="suggestion-chip" data-question="What are the hostel facilities, mess food and timings?">
+                            <i class="fa-solid fa-bed"></i> Hostel facilities & timings
+                        </button>
+                        <button class="suggestion-chip" data-question="How can I apply for SSP scholarship?">
+                            <i class="fa-solid fa-award"></i> SSP Scholarship info
+                        </button>
+                        <button class="suggestion-chip" data-question="Which routes do the college buses cover?">
+                            <i class="fa-solid fa-bus"></i> Bus routes & transport
+                        </button>
+                        <button class="suggestion-chip" data-question="How to get a Bonafide Certificate?">
+                            <i class="fa-solid fa-file-lines"></i> Bonafide Certificate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat History Loaded from Database -->
+                {% if initial_history %}
+                    {% for msg in initial_history %}
+                        {% if msg.sender == 'user' %}
+                        <div class="message-wrapper message-user">
+                            <div class="message-bubble">
+                                <div class="message-text">{{ msg.message }}</div>
+                                <div class="message-meta">
+                                    <span class="meta-time">{{ msg.timestamp }}</span>
+                                    <i class="fa-solid fa-check-double"></i>
+                                </div>
+                            </div>
+                            <div class="avatar-user" title="{{ user.full_name }}">
+                                <span>{{ user.full_name[0] | upper }}</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="message-wrapper message-bot">
+                            <div class="avatar-bot" title="College Bot">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="message-bubble">
+                                <div class="message-text">{{ msg.message }}</div>
+                                <div class="message-meta">
+                                    <span class="meta-time">{{ msg.timestamp }}</span>
+                                    <button class="btn-copy-msg" onclick="copyMessage(this)" title="Copy message">
+                                        <i class="fa-regular fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Dynamic typing indicator element -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="avatar-bot">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="typing-bubble">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <span class="typing-text">{{ college_info.short_name }} Assistant is thinking...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Chips Bar (above input) -->
+            <div class="quick-chips-bar" id="quickChipsBar">
+                <span class="chips-label"><i class="fa-regular fa-lightbulb"></i> Try:</span>
+                <button class="quick-chip" data-question="What is the highest package in placements?">Highest Package</button>
+                <button class="quick-chip" data-question="What documents are required during admission?">Admission Documents</button>
+                <button class="quick-chip" data-question="What are the library timings and book limits?">Library Timings</button>
+                <button class="quick-chip" data-question="Can college fees be paid in installments?">Fee Installments</button>
+                <button class="quick-chip" data-question="What is the college policy on ragging?">Anti-Ragging Rules</button>
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="chat-input-wrapper">
+                <form id="chatForm" class="chat-input-form">
+                    <div class="input-container">
+                        <textarea 
+                            id="messageInput" 
+                            name="message" 
+                            placeholder="Ask any question about {{ college_info.name }}... (e.g. fees, admissions, placements, hostel)" 
+                            rows="1" 
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" id="sendBtn" class="btn-send" aria-label="Send message" title="Send message (Enter)">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+                <div class="input-helper-text">
+                    <span>Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong> for new line</span>
+                    <span class="powered-by"><i class="fa-solid fa-shield-check"></i> NLP Offline Engine • Zero Paid APIs</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Clear Chat Confirmation Modal -->
+    <div class="modal-overlay" id="clearModalOverlay">
+        <div class="modal-card">
+            <div class="modal-icon text-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Clear Chat History?</h3>
+            <p>This will permanently delete all your conversation history from the database. This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelClearBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmClearBtn">
+                    <i class="fa-solid fa-trash-can"></i> Yes, Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Questions Popover / Modal -->
+    <div class="modal-overlay" id="categoryModalOverlay">
+        <div class="modal-card modal-card-wide">
+            <div class="modal-header-row">
+                <h3 id="categoryModalTitle">Category Questions</h3>
+                <button type="button" class="icon-close-modal" id="closeCategoryModalBtn">&times;</button>
+            </div>
+            <p class="category-modal-subtitle">Click any question below to ask the chatbot instantly:</p>
+            <div class="category-questions-list" id="categoryQuestionsList">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information Context for JS -->
+    <script>
+        window.CURRENT_USER = {
+            id: {{ user.id }},
+            username: "{{ user.username }}",
+            fullName: "{{ user.full_name }}",
+            department: "{{ user.department }}"
+        };
+        window.COLLEGE_INFO = {{ college_info | tojson }};
+        window.SUGGESTIONS_DATA = {{ suggestions | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
